@@ -36,6 +36,11 @@ public class JFrameNasabah extends javax.swing.JFrame {
         txtNama.setText("");
         txtTelepon.setText("");
         txtAlamat.setText("");
+        
+        btnSimpan.setText("Simpan");
+        txtNik.setEditable(true);
+        btnBatal.setEnabled(false);
+        btnHapus.setEnabled(false);
     }
     
     private void showData() {
@@ -88,6 +93,10 @@ public class JFrameNasabah extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tblData = new javax.swing.JTable();
         jLabel5 = new javax.swing.JLabel();
+        btnHapus = new javax.swing.JButton();
+        btnBatal = new javax.swing.JButton();
+        btnSearch = new javax.swing.JButton();
+        txtSearch = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -139,6 +148,11 @@ public class JFrameNasabah extends javax.swing.JFrame {
                 "No.", "NIK", "Nama", "Telepon", "Alamat"
             }
         ));
+        tblData.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblDataMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblData);
 
         getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, 420, 163));
@@ -146,6 +160,34 @@ public class JFrameNasabah extends javax.swing.JFrame {
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel5.setText("Formulir Nasabah");
         getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(143, 5, -1, -1));
+
+        btnHapus.setText("Hapus");
+        btnHapus.setEnabled(false);
+        btnHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHapusActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnHapus, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 170, -1, -1));
+
+        btnBatal.setText("Batal");
+        btnBatal.setEnabled(false);
+        btnBatal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBatalActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnBatal, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 170, -1, -1));
+
+        btnSearch.setText("Cari");
+        btnSearch.setEnabled(false);
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 380, -1, -1));
+        getContentPane().add(txtSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 380, 130, -1));
 
         pack();
         setLocationRelativeTo(null);
@@ -190,12 +232,25 @@ public class JFrameNasabah extends javax.swing.JFrame {
                             + txtTelepon.getText() + "','"
                             + txtAlamat.getText() + "')";
                     st.executeUpdate(insertData);
-                    JOptionPane.showMessageDialog(null, "Data Berhasil DIsimpan");
+                    JOptionPane.showMessageDialog(null, "Data Berhasil Disimpan");
                     clear();
+                    showData();
                 }
                 
             } else {
-                //Aksi ubah data
+                try {
+                    st = cn.createStatement();
+                    String update = "UPDATE biodata SET nama = '" + txtNama.getText() 
+                            + "', telepon = '" + txtTelepon.getText()
+                            + "', alamat = '" + txtAlamat.getText()
+                            + "' WHERE nik = '" + txtNik.getText() + "'";
+                    st.executeUpdate(update);
+                    JOptionPane.showMessageDialog(null, "Data Berhasil Diubah");
+                    clear();
+                    showData();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, e);
+                }
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e);
@@ -203,6 +258,83 @@ public class JFrameNasabah extends javax.swing.JFrame {
         
         
     }//GEN-LAST:event_btnSimpanActionPerformed
+
+    private void tblDataMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblDataMouseClicked
+        // TODO add your handling code here:
+        txtNik.setText(tblData.getValueAt(tblData.getSelectedRow(), 1).toString());
+        txtNama.setText(tblData.getValueAt(tblData.getSelectedRow(), 2).toString());
+        txtTelepon.setText(tblData.getValueAt(tblData.getSelectedRow(), 3).toString());
+        txtAlamat.setText(tblData.getValueAt(tblData.getSelectedRow(), 4).toString());
+        
+        txtNik.setEditable(false);
+        btnSimpan.setText("Ubah");
+        btnBatal.setEnabled(true);
+        btnHapus.setEnabled(true);
+    }//GEN-LAST:event_tblDataMouseClicked
+
+    private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
+        // TODO add your handling code here:
+//        if (txtNik.getText().equals("")) {
+//            JOptionPane.showMessageDialog(null, "Silakan pilih data yang ingin dihapus");
+//            
+//        } else {
+            
+            int deleteConfirm = JOptionPane.showConfirmDialog(null, "Anda yakin ingin menghapus data ini?", "Konfirmasi Penghapusan", JOptionPane.YES_NO_OPTION);
+            if (deleteConfirm == 0) {
+                try {
+                    st = cn.createStatement();
+                    String delete = "DELETE FROM biodata WHERE nik = '" + txtNik.getText() + "'";
+                    st.executeUpdate(delete);
+                    JOptionPane.showMessageDialog(null, "Data berhasil dihapus");
+                    showData();
+                    clear();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, e);
+                }
+            }
+            
+            
+            
+//        }
+        
+        
+        
+    }//GEN-LAST:event_btnHapusActionPerformed
+
+    private void btnBatalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatalActionPerformed
+        // TODO add your handling code here:
+        clear();
+    }//GEN-LAST:event_btnBatalActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel tbl = new DefaultTableModel();
+            tbl.addColumn("No.");
+            tbl.addColumn("NIK");
+            tbl.addColumn("Nama");
+            tbl.addColumn("Telepon");
+            tbl.addColumn("Alamat");
+            
+        try {
+            st = cn.createStatement();
+            rs = st.executeQuery("SELECT * FROM biodata WHERE nama LIKE '%" + txtSearch.getText() + "%'");
+            
+            int nomor = 1;
+            
+            while (rs.next()) {
+                tbl.addRow(new Object[]{
+                    nomor,
+                    rs.getString("nik"),
+                    rs.getString("nama"),
+                    rs.getString("telepon"),
+                    rs.getString("alamat")
+                });
+                tblData.setModel(tbl);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }//GEN-LAST:event_btnSearchActionPerformed
 
     /**
      * @param args the command line arguments
@@ -240,6 +372,9 @@ public class JFrameNasabah extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBatal;
+    private javax.swing.JButton btnHapus;
+    private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSimpan;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -251,6 +386,7 @@ public class JFrameNasabah extends javax.swing.JFrame {
     private javax.swing.JTextField txtAlamat;
     private javax.swing.JTextField txtNama;
     private javax.swing.JTextField txtNik;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtTelepon;
     // End of variables declaration//GEN-END:variables
 }
